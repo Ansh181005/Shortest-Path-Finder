@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortest Path Finder</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #3b82f6;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input, select, button {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-danger {
+            background-color: #ef4444;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        .canvas-container {
+            position: relative;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        canvas {
+            display: block;
+            background-color: #f8fafc;
+        }
+        
+        .path-info {
+            background-color: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .path-info p {
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .edge-controls {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .edge-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .edge-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background-color: white;
+        }
+        
+        .edge-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .edge-item:last-child {
+            border-bottom: none;
+        }
+        
+        .remove-edge {
+            color: #ef4444;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .tab-button {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            background-color: #f8fafc;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab-button:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .tab-button:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .tab-button.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shortest Path Finder</h1>
+        
+        <div class="controls">
+            <div class="form-group">
+                <label for="nodes">Number of Nodes:</label>
+                <input type="number" id="nodes" min="2" max="20" value="6">
+            </div>
+            <div class="form-group">
+                <label for="graphType">Graph Type:</label>
+                <div class="tab-buttons">
+                    <div class="tab-button active" id="userGraph">User-Created</div>
+                    <div class="tab-button" id="randomGraph">Random</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button id="generate">Create Graph</button>
+            </div>
+            <div class="form-group">
+                <label for="start">Start Node:</label>
+                <select id="start"></select>
+            </div>
+            <div class="form-group">
+                <label for="end">End Node:</label>
+                <select id="end"></select>
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button id="findPath">Find Shortest Path</button>
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button id="reset" class="btn-danger">Reset</button>
+            </div>
+        </div>
+        
+        <div class="edge-controls" id="edgeControls">
+            <h3>Add Edges:</h3>
+            <div class="edge-form">
+                <div class="form-group">
+                    <label for="fromNode">From Node:</label>
+                    <select id="fromNode"></select>
+                </div>
+                <div class="form-group">
+                    <label for="toNode">To Node:</label>
+                    <select id="toNode"></select>
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight:</label>
+                    <input type="number" id="weight" min="1" max="100" value="1">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button id="addEdge">Add Edge</button>
+                </div>
+            </div>
+            
+            <div class="edge-list" id="edgeList">
+                <div>No edges added yet</div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="graph" width="900" height="500"></canvas>
+        </div>
+        
+        <div class="path-info">
+            <p><strong>Status:</strong> <span id="status" class="status">Create a graph to begin</span></p>
+            <p><strong>Shortest path:</strong> <span id="path">-</span></p>
+            <p><strong>Distance:</strong> <span id="distance">-</span></p>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Enter the number of nodes you want in your graph</li>
+                <li>Choose between user-created or random graph</li>
+                <li>For user-created graphs, add edges between nodes</li>
+                <li>Select start and end nodes</li>
+                <li>Click "Find Shortest Path" to see the shortest path using Dijkstra's algorithm</li>
+                <li>The path will be highlighted in green, and the distance will be displayed</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Graph representation and utilities
+        class Graph {
+            constructor(numNodes) {
+                this.numNodes = numNodes;
+                this.adjacencyMatrix = Array(numNodes).fill().map(() => Array(numNodes).fill(0));
+                this.nodePositions = [];
+                this.generateNodePositions();
+            }
+            
+            generateNodePositions() {
+                // Generate positions for nodes in a circle
+                const canvas = document.getElementById('graph');
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = Math.min(centerX, centerY) - 70;
+                
+                this.nodePositions = [];
+                for (let i = 0; i < this.numNodes; i++) {
+                    const angle = (i / this.numNodes) * 2 * Math.PI;
+                    this.nodePositions.push({
+                        x: centerX + radius * Math.cos(angle),
+                        y: centerY + radius * Math.sin(angle)
+                    });
+                }
+            }
+            
+            generateRandomGraph() {
+                // Clear any existing edges
+                this.adjacencyMatrix = Array(this.numNodes).fill().map(() => Array(this.numNodes).fill(0));
+                
+                // Generate random edges with distances
+                for (let i = 0; i < this.numNodes; i++) {
+                    for (let j = i + 1; j < this.numNodes; j++) {
+                        // Add an edge with 40% probability
+                        if (Math.random() < 0.4) {
+                            const distance = Math.ceil(
+                                Math.sqrt(
+                                    Math.pow(this.nodePositions[i].x - this.nodePositions[j].x, 2) + 
+                                    Math.pow(this.nodePositions[i].y - this.nodePositions[j].y, 2)
+                                ) / 10
+                            );
+                            this.adjacencyMatrix[i][j] = distance;
+                            this.adjacencyMatrix[j][i] = distance; // Undirected graph
+                        }
+                    }
+                }
+                
+                // Ensure the graph is connected
+                this.ensureConnected();
+            }
+            
+            ensureConnected() {
+                // Use a simple approach to ensure graph is connected
+                // Connect each node to at least one other node
+                for (let i = 0; i < this.numNodes - 1; i++) {
+                    const distance = Math.ceil(
+                        Math.sqrt(
+                            Math.pow(this.nodePositions[i].x - this.nodePositions[i + 1].x, 2) + 
+                            Math.pow(this.nodePositions[i].y - this.nodePositions[i + 1].y, 2)
+                        ) / 10
+                    );
+                    this.adjacencyMatrix[i][i + 1] = distance;
+                    this.adjacencyMatrix[i + 1][i] = distance;
+                }
+            }
+            
+            addEdge(fromNode, toNode, weight) {
+                this.adjacencyMatrix[fromNode][toNode] = weight;
+                this.adjacencyMatrix[toNode][fromNode] = weight; // Undirected graph
+            }
+            
+            removeEdge(fromNode, toNode) {
+                this.adjacencyMatrix[fromNode][toNode] = 0;
+                this.adjacencyMatrix[toNode][fromNode] = 0;
+            }
+            
+            getEdges() {
+                const edges = [];
+                for (let i = 0; i < this.numNodes; i++) {
+                    for (let j = i + 1; j < this.numNodes; j++) {
+                        if (this.adjacencyMatrix[i][j] > 0) {
+                            edges.push({
+                                from: i,
+                                to: j,
+                                weight: this.adjacencyMatrix[i][j]
+                            });
+                        }
+                    }
+                }
+                return edges;
+            }
+            
+            dijkstra(startNode, endNode) {
+                const distances = Array(this.numNodes).fill(Infinity);
+                const previous = Array(this.numNodes).fill(null);
+                const visited = Array(this.numNodes).fill(false);
+                
+                distances[startNode] = 0;
+                
+                for (let i = 0; i < this.numNodes; i++) {
+                    // Find the node with the minimum distance
+                    let minDistance = Infinity;
+                    let minNode = -1;
+                    
+                    for (let j = 0; j < this.numNodes; j++) {
+                        if (!visited[j] && distances[j] < minDistance) {
+                            minDistance = distances[j];
+                            minNode = j;
+                        }
+                    }
+                    
+                    if (minNode === -1 || minNode === endNode) break;
+                    
+                    visited[minNode] = true;
+                    
+                    // Update distances to neighbors
+                    for (let j = 0; j < this.numNodes; j++) {
+                        if (this.adjacencyMatrix[minNode][j] > 0) {
+                            const newDistance = distances[minNode] + this.adjacencyMatrix[minNode][j];
+                            if (newDistance < distances[j]) {
+                                distances[j] = newDistance;
+                                previous[j] = minNode;
+                            }
+                        }
+                    }
+                }
+                
+                // Reconstruct the path
+                const path = [];
+                let current = endNode;
+                
+                while (current !== null) {
+                    path.unshift(current);
+                    current = previous[current];
+                }
+                
+                return {
+                    path: path,
+                    distance: distances[endNode]
+                };
+            }
+        }
+        
+        // UI and rendering
+        let graph = null;
+        let isUserGraph = true;
+        const canvas = document.getElementById('graph');
+        const ctx = canvas.getContext('2d');
+        const startSelect = document.getElementById('start');
+        const endSelect = document.getElementById('end');
+        const fromNodeSelect = document.getElementById('fromNode');
+        const toNodeSelect = document.getElementById('toNode');
+        const weightInput = document.getElementById('weight');
+        const edgeControls = document.getElementById('edgeControls');
+        const edgeList = document.getElementById('edgeList');
+        const statusElement = document.getElementById('status');
+        const pathElement = document.getElementById('path');
+        const distanceElement = document.getElementById('distance');
+        
+        let currentPath = [];
+        
+        function drawGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (!graph) return;
+            
+            // Draw edges
+            for (let i = 0; i < graph.numNodes; i++) {
+                for (let j = i + 1; j < graph.numNodes; j++) {
+                    if (graph.adjacencyMatrix[i][j] > 0) {
+                        const startPos = graph.nodePositions[i];
+                        const endPos = graph.nodePositions[j];
+                        
+                        // Check if this edge is part of the current path
+                        const isInPath = isEdgeInPath(i, j, currentPath);
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(startPos.x, startPos.y);
+                        ctx.lineTo(endPos.x, endPos.y);
+                        ctx.strokeStyle = isInPath ? '#22c55e' : '#94a3b8';
+                        ctx.lineWidth = isInPath ? 3 : 1.5;
+                        ctx.stroke();
+                        
+                        // Draw the weight
+                        const midX = (startPos.x + endPos.x) / 2;
+                        const midY = (startPos.y + endPos.y) / 2;
+                        
+                        ctx.fillStyle = '#1e293b';
+                        ctx.font = '14px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        // Add a white background to the text for better readability
+                        const text = graph.adjacencyMatrix[i][j].toString();
+                        const textMetrics = ctx.measureText(text);
+                        const padding = 3;
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.fillRect(
+                            midX - textMetrics.width / 2 - padding,
+                            midY - 7 - padding,
+                            textMetrics.width + 2 * padding,
+                            14 + 2 * padding
+                        );
+                        
+                        ctx.fillStyle = '#1e293b';
+                        ctx.fillText(text, midX, midY);
+                    }
+                }
+            }
+            
+            // Draw nodes
+            for (let i = 0; i < graph.numNodes; i++) {
+                const pos = graph.nodePositions[i];
+                
+                // Check if this node is part of the current path
+                const isInPath = currentPath.includes(i);
+                const isStart = currentPath.length > 0 && i === currentPath[0];
+                const isEnd = currentPath.length > 0 && i === currentPath[currentPath.length - 1];
+                
+                // Node circle
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 20, 0, 2 * Math.PI);
+                
+                if (isStart) {
+                    ctx.fillStyle = '#3b82f6'; // Blue for start
+                } else if (isEnd) {
+                    ctx.fillStyle = '#ef4444'; // Red for end
+                } else if (isInPath) {
+                    ctx.fillStyle = '#22c55e'; // Green for path
+                } else {
+                    ctx.fillStyle = '#f8fafc';
+                }
+                
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2;
+                ctx.fill();
+                ctx.stroke();
+                
+                // Node label
+                ctx.fillStyle = isInPath ? 'white' : '#1e293b';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i.toString(), pos.x, pos.y);
+            }
+        }
+        
+        function isEdgeInPath(node1, node2, path) {
+            for (let i = 0; i < path.length - 1; i++) {
+                if ((path[i] === node1 && path[i + 1] === node2) ||
+                    (path[i] === node2 && path[i + 1] === node1)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function updateNodeSelects() {
+            const selects = [startSelect, endSelect, fromNodeSelect, toNodeSelect];
+            
+            selects.forEach(select => {
+                select.innerHTML = '';
+                
+                if (!graph) return;
+                
+                for (let i = 0; i < graph.numNodes; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Node ${i}`;
+                    select.appendChild(option);
+                    
+                }
+            });
+            
+            // Set default selections
+            startSelect.value = '0';
+            endSelect.value = graph.numNodes > 1 ? '1' : '0';
+            fromNodeSelect.value = '0';
+            toNodeSelect.value = graph.numNodes > 1 ? '1' : '0';
+        }
+        
+        function updateEdgeList() {
+            if (!graph) {
+                edgeList.innerHTML = '<div>No edges added yet</div>';
+                return;
+            }
+            
+            const edges = graph.getEdges();
+            
+            if (edges.length === 0) {
+                edgeList.innerHTML = '<div>No edges added yet</div>';
+                return;
+            }
+            
+            let html = '';
+            edges.forEach(edge => {
+                html += `
+                <div class="edge-item">
+                    <span>Node ${edge.from} → Node ${edge.to} (Weight: ${edge.weight})</span>
+                    <span class="remove-edge" data-from="${edge.from}" data-to="${edge.to}">✖</span>
+                </div>
+                `;
+            });
+            
+            edgeList.innerHTML = html;
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-edge').forEach(button => {
+                button.addEventListener('click', function() {
+                    const fromNode = parseInt(this.getAttribute('data-from'));
+                    const toNode = parseInt(this.getAttribute('data-to'));
+                    
+                    graph.removeEdge(fromNode, toNode);
+                    updateEdgeList();
+                    drawGraph();
+                });
+            });
+        }
+        
+        // Tab switching
+        document.getElementById('userGraph').addEventListener('click', function() {
+            if (!isUserGraph) {
+                isUserGraph = true;
+                document.getElementById('userGraph').classList.add('active');
+                document.getElementById('randomGraph').classList.remove('active');
+            }
+        });
+        
+        document.getElementById('randomGraph').addEventListener('click', function() {
+            if (isUserGraph) {
+                isUserGraph = false;
+                document.getElementById('randomGraph').classList.add('active');
+                document.getElementById('userGraph').classList.remove('active');
+            }
+        });
+        
+        // Event handlers
+        document.getElementById('generate').addEventListener('click', () => {
+            const numNodes = parseInt(document.getElementById('nodes').value);
+            
+            if (numNodes < 2 || numNodes > 20) {
+                alert('Please enter a number between 2 and 20');
+                return;
+            }
+            
+            graph = new Graph(numNodes);
+            currentPath = [];
+            
+            if (!isUserGraph) {
+                graph.generateRandomGraph();
+                edgeControls.style.display = 'none';
+                statusElement.textContent = 'Random graph generated. Select start and end nodes to find the shortest path.';
+            } else {
+                edgeControls.style.display = 'block';
+                statusElement.textContent = 'Created empty graph. Add edges between nodes.';
+            }
+            
+            updateNodeSelects();
+            updateEdgeList();
+            drawGraph();
+            
+            pathElement.textContent = '-';
+            distanceElement.textContent = '-';
+        });
+        
+        document.getElementById('addEdge').addEventListener('click', () => {
+            if (!graph) {
+                alert('Please create a graph first');
+                return;
+            }
+            
+            const fromNode = parseInt(fromNodeSelect.value);
+            const toNode = parseInt(toNodeSelect.value);
+            const weight = parseInt(weightInput.value);
+            
+            if (fromNode === toNode) {
+                alert('Cannot add an edge from a node to itself');
+                return;
+            }
+            
+            if (weight < 1) {
+                alert('Weight must be at least 1');
+                return;
+            }
+            
+            graph.addEdge(fromNode, toNode, weight);
+            updateEdgeList();
+            drawGraph();
+        });
+        
+        document.getElementById('findPath').addEventListener('click', () => {
+            if (!graph) {
+                alert('Please create a graph first');
+                return;
+            }
+            
+            const startNode = parseInt(startSelect.value);
+            const endNode = parseInt(endSelect.value);
+            
+            const result = graph.dijkstra(startNode, endNode);
+            currentPath = result.path;
+            
+            drawGraph();
+            
+            if (result.distance === Infinity) {
+                statusElement.textContent = 'No path exists between the selected nodes.';
+                pathElement.textContent = 'No path';
+                distanceElement.textContent = 'N/A';
+            } else {
+                statusElement.textContent = 'Shortest path found!';
+                pathElement.textContent = currentPath.map(node => `Node ${node}`).join(' → ');
+                distanceElement.textContent = result.distance;
+            }
+        });
+        
+        document.getElementById('reset').addEventListener('click', () => {
+            graph = null;
+            currentPath = [];
+            
+            startSelect.innerHTML = '';
+            endSelect.innerHTML = '';
+            fromNodeSelect.innerHTML = '';
+            toNodeSelect.innerHTML = '';
+            
+            edgeControls.style.display = 'none';
+            edgeList.innerHTML = '<div>No edges added yet</div>';
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            statusElement.textContent = 'Create a graph to begin';
+            pathElement.textContent = '-';
+            distanceElement.textContent = '-';
+        });
+        
+        // Initial setup
+        drawGraph();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+The “shortest path Finder” is a web-based tool to help in calculate and display shortest path between two nodes in graph using Dijkstra’s algorithm or Floyd - Warshall algorithm. It is useful for education and helping students to understand how this algorithm is work to find shortest path in graph theory. 
